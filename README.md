@@ -11,7 +11,7 @@ https://t.me/laundrysymbolsbot
 
 ## Схема работы сервиса в Draw.io
 
-https://drive.google.com/file/d/1rZ_kVaUrn11j4grrjiQOCG3aa8ut82nP/view?usp=sharing
+https://drive.google.com/file/d/1Rj6ZoZgYkl5_yrEWUBVjdQs0ahJIiOwi/view?usp=sharing
 
 ## Имплементация в telegram бота
 
