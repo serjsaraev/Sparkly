@@ -6,6 +6,7 @@ import logging
 import cv2
 import numpy as np
 import torch
+import time
 
 import pika
 from tenacity import retry, before_log, wait_fixed, \
@@ -128,14 +129,14 @@ class RabbitConnector:
                 """
                 try:
                     d = json.loads(body)
-                        text = str(d["data"]["text"])
-                        try:
-                            label, confidence = self.model(text=text)
-                        except Exception as e:
-                            logging.error(
-                                f"Ошибка при обработки сообщения. Причина {e}"
-                            )
-                            message = self._create_error_json(exception=e)
+                    text = str(d["data"]["text"])
+                    try:
+                        label, confidence = self.model(text=text)
+                    except Exception as e:
+                        logging.error(
+                            f"Ошибка при обработки сообщения. Причина {e}"
+                        )
+                        message = self._create_error_json(exception=e)
                     else:
                         logging.exception("Невалидный формат JSON файла.")
                         message = self._create_error_json(
