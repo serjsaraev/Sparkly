@@ -1,14 +1,15 @@
 # coding=utf8
 
+import json
 import logging
 import logging.config
 import os
 
+import pika
 import yaml
 from aiogram import Bot, Dispatcher, executor, types
 from dotenv import load_dotenv
 
-from src.predict import FasterRCNN
 from src.static_text import HELLO_TEXT, NON_TARGET_TEXT, WAITING_TEXT, \
     NON_TARGET_CONTENT_TYPES, CLASSES_DICT, NON_LABELS_TEXT
 
@@ -19,7 +20,11 @@ load_dotenv()
 TOKEN = os.getenv('TOKEN')
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
-model = FasterRCNN("configs/detectron2_config.yml")
+
+rabbit_user = os.getenv("RABBIT_USER")
+rabbit_passwd = os.getenv("RABBIT_PASSWORD")
+
+rabbit_url = f'amqp://{rabbit_user}:{rabbit_passwd}@10.14.244.26:5672/master'
 
 
 @dp.message_handler(commands=['start'])
@@ -39,6 +44,7 @@ async def handle_docs_photo(message):
     await message.reply(text)
 
 
+
 @dp.message_handler(content_types=['photo'])
 async def handle_docs_photo(message):
     chat_id = message.chat.id
@@ -55,7 +61,19 @@ async def handle_docs_photo(message):
         await message.photo[-1].download(
             destination_file=photo_name)
 
-        photo_output, text = model(photo_name)
+        #photo_output, text = model(photo_name)
+        message = json.dumps({
+            'data': {photo_name}}, ensure_ascii=False)
+
+        channel.basic_publish(
+            properties=pika.BasicProperties(correlation_id=str(123),
+                                            priority=120,
+                                            reply_to="bot_input",
+                                            delivery_mode=2),
+            body=message,
+            exchange='',
+            routing_key="text_easyocr_input_dev")
+
         await bot.send_photo(chat_id, photo_output)
         output_text = []
         for i in text:
@@ -69,7 +87,7 @@ async def handle_docs_photo(message):
     else:
         text = NOT_TARGET_TEXT % user_name
         await message.reply(text)
-
+\
 
 if __name__ == '__main__':
     logging.info('Bot started!')
