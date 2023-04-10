@@ -71,7 +71,7 @@ class RabbitConnector:
             {
                 "state": "success",
                 "result": {
-                    "submarker_id": self.submarker_ids[label],
+                    "label": self.submarker_ids[label],
                     "confidence": f"{round(confidence * 100, 2)}%",
                 },
             },
