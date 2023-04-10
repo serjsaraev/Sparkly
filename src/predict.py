@@ -183,34 +183,34 @@ class RabbitConnector:
         except pika.exceptions.ConnectionClosedByBroker:
             pass
 
-    @retry(retry=retry_if_not_exception_type(
-        (AttributeError, KeyboardInterrupt, TypeError)),
-        wait=wait_fixed(5),
-        before=before_log(logging, logging.INFO),
-        before_sleep=before_sleep_log(logging, logging.INFO))
-    def rabbit_connection(self, ):
-        """
-        Connection to Rabbit MQ
-            url (str): URL of the server Rabbit MQ
-            mode (PipelineClsClustering): Object of the class model / pipeline
-            input_queue (str): Name input queue RabbitMQ
-        """
+@retry(retry=retry_if_not_exception_type(
+    (AttributeError, KeyboardInterrupt, TypeError)),
+    wait=wait_fixed(5),
+    before=before_log(logging, logging.INFO),
+    before_sleep=before_sleep_log(logging, logging.INFO))
+def rabbit_connection(self, ):
+    """
+    Connection to Rabbit MQ
+        url (str): URL of the server Rabbit MQ
+        mode (PipelineClsClustering): Object of the class model / pipeline
+        input_queue (str): Name input queue RabbitMQ
+    """
 
-        try:
-            url_pika = pika.URLParameters(self.url)
-            params = pika.ConnectionParameters(
-                heartbeat=600,
-                blocked_connection_timeout=300,
-                host=url_pika.host,
-                port=url_pika.port,
-                virtual_host=url_pika.virtual_host,
-                credentials=url_pika.credentials
-            )
-            connection = pika.BlockingConnection(params)
-            rabbit_channel = connection.channel()
-            self._listen_queue(channel=rabbit_channel)
+    try:
+        url_pika = pika.URLParameters(self.url)
+        params = pika.ConnectionParameters(
+            heartbeat=600,
+            blocked_connection_timeout=300,
+            host=url_pika.host,
+            port=url_pika.port,
+            virtual_host=url_pika.virtual_host,
+            credentials=url_pika.credentials
+        )
+        connection = pika.BlockingConnection(params)
+        rabbit_channel = connection.channel()
+        self._listen_queue(channel=rabbit_channel)
 
-        except Exception as e:
-            logging.critical(
-                f"Не удалось подключиться к серверу RabbitMQ. Причина: {e}"
-            )
+    except Exception as e:
+        logging.critical(
+            f"Не удалось подключиться к серверу RabbitMQ. Причина: {e}"
+        )
