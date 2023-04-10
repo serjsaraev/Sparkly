@@ -65,6 +65,12 @@ async def handle_docs_photo(message):
         message = json.dumps({
             'data': {photo_name}}, ensure_ascii=False)
 
+        channel.basic_qos(prefetch_count=1)
+        channel.basic_consume(
+            queue=self.input_queue,
+            on_message_callback=callback,
+        )
+
         channel.basic_publish(
             properties=pika.BasicProperties(correlation_id=str(123),
                                             priority=120,
@@ -87,7 +93,7 @@ async def handle_docs_photo(message):
     else:
         text = NOT_TARGET_TEXT % user_name
         await message.reply(text)
-\
+
 
 if __name__ == '__main__':
     logging.info('Bot started!')
